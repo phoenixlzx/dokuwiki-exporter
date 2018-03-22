@@ -1,7 +1,7 @@
 "use strict";
 
-const index = 'https://wiki.nyaa.cat/wiki:navigation?do=export_xhtmlbody';
-const host = 'https://wiki.nyaa.cat';
+const index = 'https://wiki.example.com/wiki:navigation?do=export_xhtmlbody';
+const host = 'https://wiki.example.com';
 const opts = {
     "output": "./output",
     "mediapath": "/uploads/images/migrated",
