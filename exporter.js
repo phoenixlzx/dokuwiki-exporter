@@ -24,8 +24,10 @@ fs.ensureDir(localmediapath, function(err) {
         var $ = cheerio.load(body);
         $('a').each(function(i, elem) {
             var url = $(this).attr('href');
-            if (url.indexOf('?') === -1 && url.startsWith('/') && !url.startsWith('//')) {
-                exporter(host + $(this).attr('href') + '?do=export_xhtmlbody', opts);
+            var xhtml = host + $(this).attr('href') + '?do=export_xhtmlbody';
+            // avoid request loop
+            if (url.indexOf('?') === -1 && url.startsWith('/') && !url.startsWith('//') && xhtml !== index) {
+                exporter(xhtml, opts);
             }
         });
     });
@@ -37,21 +39,75 @@ function exporter (url, opts) {
         console.log('[REQUEST]', url);
         downloadImage(body, opts);
         var htmlFile = path.resolve(opts.output, getFilename(url) + '.html');
-        console.log('writes to', htmlFile);
+        console.log('[FILE] writes to', htmlFile);
         fs.writeFileSync(htmlFile, sanitize(body, opts), 'utf8');
     });
 }
 
 function sanitize (body, opts) {
+    console.log('[SANITIZE]...');
     return sanitizeHtml(body, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
-        transformTags: {/*
+        transformTags: {
             // process interwiki links
-            'a': function (tagName, attribs) {},
+            'a': function (tagName, attribs) {
+                if (attribs && attribs.href) {
+                    if (attribs.href.startsWith('#')) {
+                        return {
+                            tagName: tagName,
+                            attribs: {
+                                href: attribs.href
+                            }
+                        }
+                    } else if (attribs.href.startsWith('/') && !attribs.href.startsWith('//')) {
+                        return {
+                            tagName: tagName,
+                            attribs: {
+                                href: convertNamespace(attribs.href)
+                            }
+                        }
+                    }
+                }
+                return {
+                    tagName: tagName,
+                    attribs: attribs
+                };
+            },
             // process media images
-            'img': function (tagName, attribs) {}*/
+            'img': function (tagName, attribs) {
+                var imgsrc = parseImgSrc(attribs.src);
+                if (imgsrc.startsWith('/') && !imgsrc.startsWith('//')) {
+                    return {
+                        tagName: tagName,
+                        attribs: {
+                            src: opts.mediapath + '/' + encodeURIComponent(getFilename(imgsrc))
+                        }
+                    };
+                } else if (imgsrc.startsWith('http')) {
+                    return {
+                        tagName: tagName,
+                        attribs: {
+                            src: imgsrc
+                        }
+                    };
+                }
+                // What else it will be?
+                return {
+                    tagName: tagName,
+                    attribs: attribs
+                };
+            }
         }
     });
+}
+
+function convertNamespace (p) {
+    // match old wiki namespace to new one
+    var namespace = getFilename(p).split(':');
+    if (!namespace[1]) return namespace[0]; // root document
+    var newpath = opts.interlink;
+    // only root namespace (book) and last filename (page) are reserved, sub namespaces act as chapter is ignored here.
+    return newpath.replace('%s1', namespace[0]).replace('%s2', namespace[namespace.length - 1]);
 }
 
 function getFilename (url) {
@@ -63,12 +119,13 @@ function downloadImage (body, opts) {
     var img = [];
     $('img').each(function (i, elem) {
         var url = $(this).attr('src');
-        if (url.indexOf('?') === -1 && url.startsWith('/') && !url.startsWith('//')) {
+        if (url.startsWith('/') && !url.startsWith('//')) {
             url = host + url;
             img[i] = url;
         }
     });
     img.forEach(function(i) {
+        i = parseImgSrc(i);
         var filename = getFilename(i);
         var localpath = path.resolve(
             localmediapath,
@@ -84,6 +141,7 @@ function downloadImage (body, opts) {
     });
 }
 
-function rndStr () {
-    return Math.random().toString(36).replace(/[^a-z0-9]+/g, '').substr(0, 24);
+function parseImgSrc (url) {
+    // check if external url
+    return urlparser.parse(url).path.startsWith('/lib/exe/fetch.php') ? decodeURIComponent(url.split('media=')[1]) : url
 }
