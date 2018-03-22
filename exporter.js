@@ -5,12 +5,14 @@ const host = 'https://wiki.nyaa.cat';
 const opts = {
     "output": "./output",
     "mediapath": "/uploads/images/migrated",
-    "interlink": "/books/%s1/page/%s2" // %s1 = book, %s2 = page title, not implemented yet.
+    "interlink": "/books/%s1/page/%s2", // %s1 = book, %s2 = page title, not implemented yet.
+    "sleep": 100 // sleep 100ms before next request, poor performance dokuwiki.
 };
 
 var request = require('request');
 var cheerio = require('cheerio');
 var sanitizeHtml = require('sanitize-html');
+var sleep = require('sleep');
 
 var fs = require('fs-extra');
 var path = require('path');
@@ -28,6 +30,7 @@ fs.ensureDir(localmediapath, function(err) {
             // avoid request loop
             if (url.indexOf('?') === -1 && url.startsWith('/') && !url.startsWith('//') && xhtml !== index) {
                 exporter(xhtml, opts);
+                sleep.msleep(opts.sleep);
             }
         });
     });
@@ -138,6 +141,7 @@ function downloadImage (body, opts) {
                 console.log('[DOWNLOAD IMG ERR]', err)
             })
             .pipe(fs.createWriteStream(localpath));
+        sleep.msleep(opts.sleep);
     });
 }
 
