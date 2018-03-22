@@ -1,5 +1,5 @@
 {
-  "name": "export-dokuwiki",
+  "name": "dokuwiki-exporter",
   "version": "0.0.1",
   "description": "Export dokuwiki pages to clean HTML for easier migration.",
   "main": "export.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/phoenixlzx/export-dokuwiki.git"
+    "url": "git+https://github.com/phoenixlzx/dokuwiki-exporter.git"
   },
   "keywords": [
     "export",
@@ -17,9 +17,9 @@
   "author": "phoenixlzx <i@phoenixlzx.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/phoenixlzx/export-dokuwiki/issues"
+    "url": "https://github.com/phoenixlzx/dokuwiki-exporter/issues"
   },
-  "homepage": "https://github.com/phoenixlzx/export-dokuwiki#readme",
+  "homepage": "https://github.com/phoenixlzx/dokuwiki-exporter#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "request": "^2.85.0",
