@@ -2,9 +2,9 @@
   "name": "dokuwiki-exporter",
   "version": "0.0.1",
   "description": "Export dokuwiki pages to clean HTML for easier migration.",
-  "main": "export.js",
+  "main": "exporter.js",
   "scripts": {
-    "start": "node export.js"
+    "start": "node exporter.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
   "homepage": "https://github.com/phoenixlzx/dokuwiki-exporter#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "fs-extra": "^5.0.0",
     "request": "^2.85.0",
     "sanitize-html": "^1.18.2"
   }
