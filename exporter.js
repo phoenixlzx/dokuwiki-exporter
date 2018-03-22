@@ -83,7 +83,7 @@ function sanitize (body, opts) {
                     return {
                         tagName: tagName,
                         attribs: {
-                            src: opts.mediapath + '/' + encodeURIComponent(getFilename(imgsrc))
+                            src: opts.mediapath + '/' + getFilename(imgsrc)
                         }
                     };
                 } else if (imgsrc.startsWith('http')) {
