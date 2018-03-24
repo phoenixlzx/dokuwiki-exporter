@@ -69,6 +69,13 @@ function sanitize (body, opts) {
                                 href: convertNamespace(attribs.href)
                             }
                         }
+                    } else if  (urlparser.host(imgsrc) === urlparser.host(host)) {
+                        return {
+                            tagName: tagName,
+                            attribs: {
+                                href: convertNamespace(urlparser.pathname(attribs.href))
+                            }
+                        }
                     }
                 }
                 return {
@@ -86,19 +93,20 @@ function sanitize (body, opts) {
                             src: opts.mediapath + '/' + getFilename(imgsrc)
                         }
                     };
-                } else if (imgsrc.startsWith('http')) {
+                }  else if (imgsrc.startsWith('http')) {
                     return {
                         tagName: tagName,
                         attribs: {
                             src: imgsrc
                         }
                     };
+                } else {
+                    // What else it will be?
+                    return {
+                        tagName: tagName,
+                        attribs: attribs
+                    };
                 }
-                // What else it will be?
-                return {
-                    tagName: tagName,
-                    attribs: attribs
-                };
             }
         }
     });
